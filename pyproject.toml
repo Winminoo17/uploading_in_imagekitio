@@ -1,0 +1,21 @@
+[project]
+name = "my-fastapi-app"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "fastapi>=0.141.1",
+    "fastapi-users[sqlalchemy]>=15.0.5",
+    "imagekitio>=5.9.0",
+    "python-dotenv>=1.2.3",
+    "requests>=2.32.0",
+    "streamlit>=1.45.0",
+    "uvicorn[standard]>=0.52.4",
+]
+
+# Add this line right here:
+[tool.uv]
+managed = true
+package = false

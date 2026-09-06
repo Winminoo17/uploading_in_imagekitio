@@ -1,6 +1,8 @@
 import uuid
 from typing import Optional
 
+from dotenv import load_dotenv
+
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin
 from fastapi_users.authentication import (
@@ -9,12 +11,13 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 from fastapi_users.db import SQLAlchemyUserDatabase
+import os
+load_dotenv()  
 
-# သင့် Project ရှိ Database file ထဲမှ User model နှင့် get_user_db ကို import လုပ်ပါ
+
 from app.db import User, get_user_db
 
-SECRET = "supersecret"
-
+SECRET = os.getenv("SECRET_KEY")
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = SECRET

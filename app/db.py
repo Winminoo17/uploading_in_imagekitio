@@ -1,5 +1,7 @@
 from collections.abc import AsyncIterator
 import uuid
+
+from dotenv import load_dotenv
 from fastapi import Depends
 from sqlalchemy import Column, String, Text, ForeignKey, DateTime, inspect, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -8,7 +10,14 @@ from sqlalchemy.dialects.postgresql import UUID
 import datetime
 from fastapi_users.db import SQLAlchemyUserDatabase, SQLAlchemyBaseUserTableUUID
 
-DATABASE_URL = "sqlite+aiosqlite:///./test.db"
+load_dotenv()
+import os
+
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./test.db")
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 class Base(DeclarativeBase):
     pass

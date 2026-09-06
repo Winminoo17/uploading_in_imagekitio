@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import base64
 from urllib.parse import quote, urlsplit
+import os
 
 st.set_page_config(page_title="Simple Social", layout="wide")
 
@@ -11,6 +12,7 @@ if 'token' not in st.session_state:
 if 'user' not in st.session_state:
     st.session_state.user = None
 
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 def get_headers():
     """Get authorization headers with token"""
@@ -33,14 +35,14 @@ def login_page():
             if st.button("Login", type="primary", use_container_width=True):
                 # Login using FastAPI Users JWT endpoint
                 login_data = {"username": email, "password": password}
-                response = requests.post("http://localhost:8000/auth/jwt/login", data=login_data)
+                response = requests.post(f"{BACKEND_URL}/auth/jwt/login", data=login_data)
 
                 if response.status_code == 200:
                     token_data = response.json()
                     st.session_state.token = token_data["access_token"]
 
                     # Get user info
-                    user_response = requests.get("http://localhost:8000/users/me", headers=get_headers())
+                    user_response = requests.get(f"{BACKEND_URL}/users/me", headers=get_headers())
                     if user_response.status_code == 200:
                         st.session_state.user = user_response.json()
                         st.rerun()
@@ -53,7 +55,7 @@ def login_page():
             if st.button("Sign Up", type="secondary", use_container_width=True):
                 # Register using FastAPI Users
                 signup_data = {"email": email, "password": password}
-                response = requests.post("http://localhost:8000/auth/register", json=signup_data)
+                response = requests.post(f"{BACKEND_URL}/auth/register", json=signup_data)
 
                 if response.status_code == 201:
                     st.success("Account created! Click Login now.")
@@ -74,7 +76,7 @@ def upload_page():
         with st.spinner("Uploading..."):
             files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
             data = {"caption": caption}
-            response = requests.post("http://localhost:8000/upload", files=files, data=data, headers=get_headers())
+            response = requests.post(f"{BACKEND_URL}/upload", files=files, data=data, headers=get_headers())
 
             if response.status_code == 200:
                 st.success("Posted!")
@@ -118,7 +120,7 @@ def create_transformed_url(original_url, transformation_params, caption=None):
 def feed_page():
     st.title("🏠 Feed")
 
-    response = requests.get("http://localhost:8000/feed", headers=get_headers())
+    response = requests.get(f"{BACKEND_URL}/feed", headers=get_headers())
     if response.status_code == 200:
         posts = response.json()["posts"]
 
@@ -137,7 +139,7 @@ def feed_page():
                 if post.get('is_owner', False):
                     if st.button("🗑️", key=f"delete_{post['id']}", help="Delete post"):
                         # Delete the post
-                        response = requests.delete(f"http://localhost:8000/delete/{post['id']}", headers=get_headers())
+                        response = requests.delete(f"{BACKEND_URL}/delete/{post['id']}", headers=get_headers())
                         if response.status_code == 200:
                             st.success("Post deleted!")
                             st.rerun()
